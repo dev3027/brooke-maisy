@@ -1,0 +1,373 @@
+<% content_for :title, @page_title %>
+<% content_for :description, @meta_description %>
+<% content_for :head do %>
+  <link rel="canonical" href="<%= @canonical_url %>">
+  <meta property="og:title" content="<%= @og_title %>">
+  <meta property="og:description" content="<%= @og_description %>">
+  <meta property="og:type" content="<%= @og_type %>">
+  <meta property="og:url" content="<%= @canonical_url %>">
+  <% if @og_image %>
+    <meta property="og:image" content="<%= @og_image %>">
+  <% end %>
+  <script type="application/ld+json">
+    <%= raw @structured_data.to_json %>
+  </script>
+  <style>
+    input[type="radio"]:checked + div .radio-indicator {
+      opacity: 1;
+    }
+    input[type="radio"]:checked + div {
+      border-color: #d1d5db;
+      background-color: #f9fafb;
+    }
+  </style>
+<% end %>
+
+<!-- Breadcrumbs -->
+<%= render 'shared/breadcrumbs', breadcrumbs: [
+  { text: 'Shop', url: products_path },
+  { text: @product.category.name, url: category_path(@product.category) },
+  { text: @product.name, url: nil }
+] %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
+    <!-- Product Images -->
+    <div class="mb-8 lg:mb-0">
+      <div data-controller="image-gallery" class="space-y-4">
+        <!-- Main Image -->
+        <div class="aspect-square bg-ivory-100 rounded-lg overflow-hidden">
+          <% if @product.images.any? %>
+            <% @product.images.each_with_index do |image, index| %>
+              <img data-image-gallery-target="image" 
+                   data-index="<%= index %>"
+                   src="<%= url_for(image) %>" 
+                   alt="<%= @product.name %> - Image <%= index + 1 %>"
+                   class="w-full h-full object-cover cursor-zoom-in <%= 'hidden' unless index == 0 %>"
+                   data-action="click->image-gallery#openLightbox">
+            <% end %>
+          <% else %>
+            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-ivory-100 to-ivory-200">
+              <div class="text-8xl text-ivory-400">🎨</div>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Thumbnail Images -->
+        <% if @product.images.count > 1 %>
+          <div class="grid grid-cols-4 gap-2">
+            <% @product.images.each_with_index do |image, index| %>
+              <button data-action="click->image-gallery#selectImage"
+                      data-index="<%= index %>"
+                      class="aspect-square bg-ivory-100 rounded-md overflow-hidden border-2 <%= index == 0 ? 'border-ivory-500' : 'border-transparent hover:border-ivory-300' %> transition-colors">
+                <img src="<%= url_for(image) %>" 
+                     alt="<%= @product.name %> - Thumbnail <%= index + 1 %>"
+                     class="w-full h-full object-cover">
+              </button>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Image Lightbox Modal -->
+      <div data-image-gallery-target="lightbox" 
+           class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4"
+           data-action="click->image-gallery#closeLightbox">
+        <div class="relative max-w-4xl max-h-full">
+          <button data-action="click->image-gallery#closeLightbox"
+                  class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+          <img data-image-gallery-target="lightboxImage" 
+               src="" 
+               alt=""
+               class="max-w-full max-h-full object-contain"
+               data-action="click->image-gallery#stopPropagation">
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Information -->
+    <div class="lg:sticky lg:top-20">
+      <!-- Product Header -->
+      <div class="mb-6">
+        <p class="text-sm text-ivory-500 uppercase tracking-wide font-medium mb-2">
+          <%= @product.category.name %>
+        </p>
+        <h1 class="text-3xl font-bold text-ivory-900 mb-4"><%= @product.name %></h1>
+        
+        <!-- Reviews -->
+        <% if @product.reviews.approved.any? %>
+          <div class="flex items-center gap-2 mb-4">
+            <div class="flex items-center">
+              <% 5.times do |i| %>
+                <% if i < @product.average_rating.floor %>
+                  <svg class="w-5 h-5 text-pastel-peach fill-current" viewBox="0 0 20 20">
+                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                  </svg>
+                <% elsif i < @product.average_rating %>
+                  <svg class="w-5 h-5 text-pastel-peach fill-current" viewBox="0 0 20 20">
+                    <defs>
+                      <linearGradient id="half-fill-show">
+                        <stop offset="50%" stop-color="currentColor"/>
+                        <stop offset="50%" stop-color="transparent"/>
+                      </linearGradient>
+                    </defs>
+                    <path fill="url(#half-fill-show)" d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                  </svg>
+                <% else %>
+                  <svg class="w-5 h-5 text-ivory-300 fill-current" viewBox="0 0 20 20">
+                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                  </svg>
+                <% end %>
+              <% end %>
+            </div>
+            <span class="text-sm text-ivory-600">
+              <%= @product.average_rating %> (<%= pluralize(@product.reviews_count, 'review') %>)
+            </span>
+          </div>
+        <% end %>
+
+        <!-- Price -->
+        <div class="mb-6">
+          <span class="text-3xl font-bold text-ivory-900"><%= @product.display_price %></span>
+          <% if @product.weight.present? %>
+            <span class="text-sm text-ivory-500 ml-2">(<%= @product.formatted_weight %>)</span>
+          <% end %>
+        </div>
+
+        <!-- Stock Status -->
+        <div class="mb-6">
+          <% if @product.in_stock? %>
+            <div class="flex items-center text-pastel-sage">
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span class="font-medium">In Stock</span>
+              <% if @product.low_stock? %>
+                <span class="text-pastel-peach ml-2 text-sm">(Only <%= @product.inventory_count %> left)</span>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="flex items-center text-ivory-500">
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              <span class="font-medium">Out of Stock</span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Product Variants -->
+      <% if @variants.any? %>
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-ivory-900 mb-3">Available Options</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <% @variants.each do |variant| %>
+              <div class="border border-ivory-200 rounded-lg p-3 hover:border-ivory-300 transition-colors">
+                <% if variant.images.any? %>
+                  <img src="<%= url_for(variant.images.first) %>" 
+                       alt="<%= variant.name %>"
+                       class="w-full aspect-square object-cover rounded-md mb-2">
+                <% end %>
+                <h4 class="font-medium text-ivory-900 text-sm"><%= variant.name %></h4>
+                <p class="text-sm text-ivory-600"><%= variant.display_price %></p>
+                <% if variant.in_stock? %>
+                  <p class="text-xs text-pastel-sage">In Stock</p>
+                <% else %>
+                  <p class="text-xs text-ivory-500">Out of Stock</p>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Add to Cart Section -->
+      <div class="mb-8 p-6 bg-ivory-50 rounded-lg" data-controller="cart">
+        <% if @product.in_stock? || @variants.any?(&:in_stock?) %>
+          <%= form_with url: cart_items_path, method: :post, local: false, data: { turbo: false }, class: "space-y-4" do |form| %>
+            <%= form.hidden_field :product_id, value: @product.id %>
+            
+            <!-- Variant Selection -->
+            <% if @variants.any? %>
+              <div>
+                <label class="block text-sm font-medium text-ivory-700 mb-2">Select Option:</label>
+                <div class="grid grid-cols-1 gap-2">
+                  <% @variants.each_with_index do |variant, index| %>
+                    <label class="relative flex items-center p-3 border border-ivory-200 rounded-lg cursor-pointer hover:border-ivory-300 transition-colors">
+                      <%= form.radio_button :product_variant_id, variant.id,
+                          class: "sr-only",
+                          checked: index == 0,
+                          data: {
+                            action: "change->cart#updateVariantSelection",
+                            price: variant.price,
+                            stock: variant.inventory_count,
+                            in_stock: variant.in_stock?
+                          } %>
+                      <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center">
+                          <div class="flex-shrink-0 w-2 h-2 bg-ivory-500 rounded-full mr-3 opacity-0 radio-indicator"></div>
+                          <div>
+                            <p class="text-sm font-medium text-ivory-900"><%= variant.name %></p>
+                            <p class="text-sm text-ivory-600"><%= variant.display_price %></p>
+                          </div>
+                        </div>
+                        <div class="text-right">
+                          <% if variant.in_stock? %>
+                            <span class="text-xs text-pastel-sage font-medium">In Stock</span>
+                            <% if variant.low_stock? %>
+                              <p class="text-xs text-pastel-peach">Only <%= variant.inventory_count %> left</p>
+                            <% end %>
+                          <% else %>
+                            <span class="text-xs text-ivory-500">Out of Stock</span>
+                          <% end %>
+                        </div>
+                      </div>
+                    </label>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Quantity Selection -->
+            <div>
+              <label for="quantity" class="block text-sm font-medium text-ivory-700 mb-2">Quantity:</label>
+              <div class="flex items-center space-x-3">
+                <button type="button" class="quantity-decrease bg-white border border-ivory-300 rounded-l-md px-3 py-2 text-sm font-medium text-ivory-700 hover:bg-ivory-50 focus:outline-none focus:ring-2 focus:ring-ivory-500" data-action="click->cart#decreaseQuantity">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                  </svg>
+                </button>
+                <%= form.number_field :quantity,
+                    value: 1,
+                    min: 1,
+                    max: [@product.inventory_count, 10].min,
+                    class: "quantity-input w-20 border-t border-b border-ivory-300 text-center text-sm font-medium text-ivory-700 focus:outline-none focus:ring-2 focus:ring-ivory-500",
+                    data: {
+                      action: "change->cart#validateQuantity"
+                    } %>
+                <button type="button" class="quantity-increase bg-white border border-ivory-300 rounded-r-md px-3 py-2 text-sm font-medium text-ivory-700 hover:bg-ivory-50 focus:outline-none focus:ring-2 focus:ring-ivory-500" data-action="click->cart#increaseQuantity">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Add to Cart Button -->
+            <button type="submit"
+                    class="w-full bg-ivory-500 hover:bg-ivory-600 text-white py-3 px-6 rounded-lg font-semibold text-lg transition-colors mb-3 disabled:bg-ivory-300 disabled:cursor-not-allowed"
+                    data-action="click->cart#addToCart">
+              Add to Cart
+            </button>
+          <% end %>
+          
+          <button class="w-full border border-ivory-500 text-ivory-700 hover:bg-ivory-500 hover:text-white py-2 px-6 rounded-lg font-medium transition-colors">
+            Add to Wishlist
+          </button>
+        <% else %>
+          <button class="w-full bg-ivory-300 text-ivory-500 py-3 px-6 rounded-lg font-semibold text-lg cursor-not-allowed mb-3" disabled>
+            Out of Stock
+          </button>
+          <button class="w-full border border-ivory-300 text-ivory-500 py-2 px-6 rounded-lg font-medium">
+            Notify When Available
+          </button>
+        <% end %>
+      </div>
+
+      <!-- Product Details -->
+      <div class="space-y-6">
+        <!-- Description -->
+        <div>
+          <h3 class="text-lg font-semibold text-ivory-900 mb-3">Description</h3>
+          <div class="prose prose-sm text-ivory-700">
+            <%= simple_format(@product.description) %>
+          </div>
+        </div>
+
+        <!-- Product Details -->
+        <div>
+          <h3 class="text-lg font-semibold text-ivory-900 mb-3">Product Details</h3>
+          <dl class="space-y-2">
+            <div class="flex justify-between">
+              <dt class="text-sm text-ivory-600">SKU:</dt>
+              <dd class="text-sm text-ivory-900 font-medium"><%= @product.sku %></dd>
+            </div>
+            <% if @product.weight.present? %>
+              <div class="flex justify-between">
+                <dt class="text-sm text-ivory-600">Weight:</dt>
+                <dd class="text-sm text-ivory-900 font-medium"><%= @product.formatted_weight %></dd>
+              </div>
+            <% end %>
+            <% if @product.dimensions.present? %>
+              <div class="flex justify-between">
+                <dt class="text-sm text-ivory-600">Dimensions:</dt>
+                <dd class="text-sm text-ivory-900 font-medium"><%= @product.dimensions %></dd>
+              </div>
+            <% end %>
+            <% if @product.materials.present? %>
+              <div class="flex justify-between">
+                <dt class="text-sm text-ivory-600">Materials:</dt>
+                <dd class="text-sm text-ivory-900 font-medium"><%= @product.materials %></dd>
+              </div>
+            <% end %>
+            <% if @product.care_instructions.present? %>
+              <div class="flex justify-between">
+                <dt class="text-sm text-ivory-600">Care:</dt>
+                <dd class="text-sm text-ivory-900 font-medium"><%= @product.care_instructions %></dd>
+              </div>
+            <% end %>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <% if @reviews.any? %>
+    <div class="mt-16 border-t border-ivory-200 pt-16">
+      <h2 class="text-2xl font-bold text-ivory-900 mb-8">Customer Reviews</h2>
+      <div class="space-y-6">
+        <% @reviews.each do |review| %>
+          <div class="bg-white rounded-lg p-6 shadow-sm">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center">
+                <div class="flex items-center mr-4">
+                  <% 5.times do |i| %>
+                    <svg class="w-4 h-4 <%= i < review.rating ? 'text-pastel-peach' : 'text-ivory-300' %> fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                    </svg>
+                  <% end %>
+                </div>
+                <div>
+                  <p class="font-medium text-ivory-900"><%= review.user.display_name %></p>
+                  <p class="text-sm text-ivory-500"><%= review.created_at.strftime("%B %d, %Y") %></p>
+                </div>
+              </div>
+            </div>
+            <% if review.title.present? %>
+              <h4 class="font-semibold text-ivory-900 mb-2"><%= review.title %></h4>
+            <% end %>
+            <p class="text-ivory-700"><%= simple_format(review.content) %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Related Products -->
+  <% if @related_products.any? %>
+    <div class="mt-16 border-t border-ivory-200 pt-16">
+      <h2 class="text-2xl font-bold text-ivory-900 mb-8">More from <%= @product.category.name %></h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <% @related_products.each do |product| %>
+          <%= render 'shared/product_card', product: product %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

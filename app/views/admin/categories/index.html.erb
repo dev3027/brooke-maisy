@@ -1,0 +1,230 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Categories</h1>
+      <p class="mt-1 text-sm text-gray-500">
+        Organize your products into categories
+      </p>
+    </div>
+    <div class="flex space-x-3">
+      <%= link_to "Add Category", new_admin_category_path,
+          class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-400 hover:bg-pink-500 transition-colors" %>
+    </div>
+  </div>
+  
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+              <span class="text-white font-bold text-sm"><%= @total_count %></span>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Total Categories</dt>
+              <dd class="text-lg font-medium text-gray-900"><%= @total_count %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+              <span class="text-white font-bold text-sm"><%= @active_count %></span>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Active Categories</dt>
+              <dd class="text-lg font-medium text-gray-900"><%= @active_count %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
+              <span class="text-white font-bold text-sm"><%= @inactive_count %></span>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Inactive Categories</dt>
+              <dd class="text-lg font-medium text-gray-900"><%= @inactive_count %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Categories Table -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-medium text-gray-900">Categories</h3>
+        <div class="text-sm text-gray-500">
+          Drag and drop to reorder categories
+        </div>
+      </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200" id="categories-table">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Order
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Category
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Products
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Status
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200" id="sortable-categories">
+          <% @categories.each do |category| %>
+            <tr class="hover:bg-gray-50 cursor-move" data-category-id="<%= category.id %>">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center space-x-2">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                  </svg>
+                  <span class="text-sm font-medium text-gray-900"><%= category.position %></span>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div>
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= link_to category.name, admin_category_path(category), class: "hover:text-pink-400" %>
+                  </div>
+                  <% if category.description.present? %>
+                    <div class="text-sm text-gray-500"><%= truncate(category.description, length: 60) %></div>
+                  <% end %>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <%= link_to category.products_count, admin_products_path(category: category.id), 
+                    class: "text-pink-400 hover:text-pink-500" %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= category.active? ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                  <%= category.active? ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end space-x-2">
+                  <%= link_to move_up_admin_category_path(category), 
+                      method: :patch,
+                      class: "text-gray-400 hover:text-gray-600",
+                      title: "Move Up" do %>
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                    </svg>
+                  <% end %>
+                  
+                  <%= link_to move_down_admin_category_path(category), 
+                      method: :patch,
+                      class: "text-gray-400 hover:text-gray-600",
+                      title: "Move Down" do %>
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  <% end %>
+                  
+                  <%= link_to "View", admin_category_path(category), 
+                      class: "text-pink-400 hover:text-pink-500" %>
+                  <%= link_to "Edit", edit_admin_category_path(category), 
+                      class: "text-gray-600 hover:text-gray-900" %>
+                  <%= link_to "Delete", admin_category_path(category), 
+                      method: :delete,
+                      data: { confirm: "Are you sure?" },
+                      class: "text-red-600 hover:text-red-900" %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add drag and drop functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Simple drag and drop implementation
+  const tbody = document.getElementById('sortable-categories');
+  if (tbody) {
+    let draggedElement = null;
+    
+    tbody.addEventListener('dragstart', function(e) {
+      draggedElement = e.target.closest('tr');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    
+    tbody.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+    
+    tbody.addEventListener('drop', function(e) {
+      e.preventDefault();
+      const targetRow = e.target.closest('tr');
+      
+      if (draggedElement && targetRow && draggedElement !== targetRow) {
+        const rect = targetRow.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        
+        if (e.clientY < midpoint) {
+          tbody.insertBefore(draggedElement, targetRow);
+        } else {
+          tbody.insertBefore(draggedElement, targetRow.nextSibling);
+        }
+        
+        // Update positions
+        updateCategoryOrder();
+      }
+    });
+    
+    // Make rows draggable
+    tbody.querySelectorAll('tr').forEach(row => {
+      row.draggable = true;
+    });
+  }
+  
+  function updateCategoryOrder() {
+    const rows = tbody.querySelectorAll('tr');
+    const categoryIds = Array.from(rows).map(row => row.dataset.categoryId);
+    
+    fetch('<%= reorder_admin_categories_path %>', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ category_ids: categoryIds })
+    });
+  }
+});
+</script>

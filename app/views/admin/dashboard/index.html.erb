@@ -1,0 +1,195 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+    <div class="flex space-x-3">
+      <%= link_to "View Site", root_path, target: "_blank",
+          class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors" %>
+      <%= link_to "Add Product", new_admin_product_path,
+          class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-200 hover:bg-opacity-90 transition-colors" %>
+    </div>
+  </div>
+  
+  <!-- Metrics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Total Products -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Total Products</dt>
+              <dd class="text-lg font-medium text-gray-900"><%= @metrics[:total_products] %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Active Products -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Active Products</dt>
+              <dd class="text-lg font-medium text-gray-900"><%= @metrics[:active_products] %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Total Orders -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Total Orders</dt>
+              <dd class="text-lg font-medium text-gray-900"><%= @metrics[:total_orders] %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Total Revenue -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
+              <dd class="text-lg font-medium text-gray-900">$<%= number_with_precision(@metrics[:total_revenue], precision: 2) %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Recent Orders -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Recent Orders</h3>
+        <div class="space-y-3">
+          <% if @recent_orders.any? %>
+            <% @recent_orders.each do |order| %>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p class="text-sm font-medium text-gray-900">#<%= order.id %></p>
+                  <p class="text-sm text-gray-500"><%= order.user&.display_name || 'Guest' %></p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm font-medium text-gray-900">$<%= number_with_precision(order.total_amount || 0, precision: 2) %></p>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <%= order.status&.humanize || 'Pending' %>
+                  </span>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="text-center py-4">
+              <p class="text-sm text-gray-500">No recent orders</p>
+            </div>
+          <% end %>
+        </div>
+        <div class="mt-4">
+          <%= link_to "View All Orders", admin_orders_path, class: "text-sm font-medium text-pink-200 hover:text-opacity-80" %>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Low Stock Products -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Low Stock Alert</h3>
+        <div class="space-y-3">
+          <% if @low_stock_products.any? %>
+            <% @low_stock_products.each do |product| %>
+              <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                <div>
+                  <p class="text-sm font-medium text-gray-900"><%= product.name %></p>
+                  <p class="text-sm text-gray-500"><%= product.category&.name || 'No Category' %></p>
+                </div>
+                <div class="text-right">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <%= product.inventory_count %> left
+                  </span>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="text-center py-4">
+              <p class="text-sm text-gray-500">No low stock products</p>
+            </div>
+          <% end %>
+        </div>
+        <div class="mt-4">
+          <%= link_to "Manage Inventory", admin_products_path(filter: 'low_stock'), class: "text-sm font-medium text-pink-200 hover:text-opacity-80" %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quick Actions -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Quick Actions</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <%= link_to new_admin_product_path, class: "flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" do %>
+          <svg class="w-8 h-8 text-pink-200 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-gray-900">Add New Product</p>
+            <p class="text-sm text-gray-500">Create a new product listing</p>
+          </div>
+        <% end %>
+        
+        <%= link_to admin_orders_path, class: "flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" do %>
+          <svg class="w-8 h-8 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-gray-900">Manage Orders</p>
+            <p class="text-sm text-gray-500">View and process orders</p>
+          </div>
+        <% end %>
+        
+        <%= link_to admin_customers_path, class: "flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" do %>
+          <svg class="w-8 h-8 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-gray-900">View Customers</p>
+            <p class="text-sm text-gray-500">Manage customer accounts</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

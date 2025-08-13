@@ -1,0 +1,239 @@
+<% content_for :title, "Shopping Cart" %>
+
+<div class="min-h-screen bg-gradient-to-br from-ivory-50 to-rose-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex mb-8" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <li class="inline-flex items-center">
+          <%= link_to root_path, class: "inline-flex items-center text-sm font-medium text-gray-700 hover:text-rose-600" do %>
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-3a1 1 0 011-1h2a1 1 0 011 1v3a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+            </svg>
+            Home
+          <% end %>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Shopping Cart</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
+      <p class="text-gray-600">
+        <% if @cart.has_items? %>
+          You have <%= pluralize(@cart.total_items, 'item') %> in your cart
+        <% else %>
+          Your cart is empty
+        <% end %>
+      </p>
+    </div>
+
+    <% if @cart.has_items? %>
+      <div class="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start xl:gap-x-16">
+        <!-- Cart Items -->
+        <section aria-labelledby="cart-heading" class="lg:col-span-7">
+          <h2 id="cart-heading" class="sr-only">Items in your shopping cart</h2>
+
+          <ul role="list" class="border-t border-b border-gray-200 divide-y divide-gray-200">
+            <% @cart_items.each do |item| %>
+              <li class="flex py-6 sm:py-10" data-cart-item-id="<%= item.id %>">
+                <div class="flex-shrink-0">
+                  <% if item.item_image.present? %>
+                    <%= image_tag item.item_image, alt: item.item_name, class: "w-24 h-24 rounded-md object-center object-cover sm:w-48 sm:h-48" %>
+                  <% else %>
+                    <div class="w-24 h-24 sm:w-48 sm:h-48 bg-gray-200 rounded-md flex items-center justify-center">
+                      <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                  <% end %>
+                </div>
+
+                <div class="ml-4 flex-1 flex flex-col justify-between sm:ml-6">
+                  <div class="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
+                    <div>
+                      <div class="flex justify-between">
+                        <h3 class="text-sm">
+                          <%= link_to item.product, class: "font-medium text-gray-700 hover:text-gray-800" do %>
+                            <%= item.item_name %>
+                          <% end %>
+                        </h3>
+                      </div>
+                      <% if item.product_variant.present? %>
+                        <div class="mt-1 flex text-sm">
+                          <p class="text-gray-500"><%= item.product_variant.variant_description %></p>
+                        </div>
+                      <% end %>
+                      <p class="mt-1 text-sm font-medium text-gray-900"><%= item.formatted_item_price %></p>
+                    </div>
+
+                    <div class="mt-4 sm:mt-0 sm:pr-9">
+                      <div class="flex items-center">
+                        <label for="quantity-<%= item.id %>" class="sr-only">Quantity, <%= item.item_name %></label>
+                        <%= form_with model: item, url: cart_item_path(item), method: :patch, local: false, data: { turbo_frame: "cart-item-#{item.id}" }, class: "flex items-center" do |form| %>
+                          <button type="button" class="quantity-decrease bg-white border border-gray-300 rounded-l-md px-2 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500" data-action="click->cart#decreaseQuantity" data-cart-item-id="<%= item.id %>">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                            </svg>
+                          </button>
+                          <%= form.number_field :quantity, 
+                                value: item.quantity, 
+                                min: 1, 
+                                max: item.max_quantity,
+                                class: "quantity-input w-16 border-t border-b border-gray-300 text-center text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-500",
+                                data: { 
+                                  action: "change->cart#updateQuantity",
+                                  cart_item_id: item.id
+                                } %>
+                          <button type="button" class="quantity-increase bg-white border border-gray-300 rounded-r-md px-2 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500" data-action="click->cart#increaseQuantity" data-cart-item-id="<%= item.id %>">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                          </button>
+                        <% end %>
+                      </div>
+
+                      <div class="absolute top-0 right-0">
+                        <%= link_to cart_item_path(item), method: :delete, 
+                            data: { 
+                              confirm: "Are you sure you want to remove this item?",
+                              turbo_method: :delete
+                            },
+                            class: "inline-flex p-2 text-gray-400 hover:text-gray-500" do %>
+                          <span class="sr-only">Remove</span>
+                          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                          </svg>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p class="mt-4 flex text-sm text-gray-700 space-x-2">
+                    <% if item.in_stock? %>
+                      <svg class="flex-shrink-0 w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                      <span>In stock</span>
+                    <% else %>
+                      <svg class="flex-shrink-0 w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                      </svg>
+                      <span class="text-red-600">Out of stock</span>
+                    <% end %>
+                  </p>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </section>
+
+        <!-- Order Summary -->
+        <section aria-labelledby="summary-heading" class="mt-16 bg-white rounded-lg px-4 py-6 sm:p-6 lg:p-8 lg:mt-0 lg:col-span-5 shadow-lg">
+          <h2 id="summary-heading" class="text-lg font-medium text-gray-900">Order summary</h2>
+
+          <dl class="mt-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <dt class="text-sm text-gray-600">Subtotal (<%= pluralize(@cart.total_items, 'item') %>)</dt>
+              <dd class="text-sm font-medium text-gray-900"><%= @cart.formatted_total %></dd>
+            </div>
+            <div class="border-t border-gray-200 pt-4 flex items-center justify-between">
+              <dt class="flex items-center text-sm text-gray-600">
+                <span>Shipping estimate</span>
+                <a href="#" class="ml-2 flex-shrink-0 text-gray-400 hover:text-gray-500">
+                  <span class="sr-only">Learn more about how shipping is calculated</span>
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                  </svg>
+                </a>
+              </dt>
+              <dd class="text-sm font-medium text-gray-900">Calculated at checkout</dd>
+            </div>
+            <div class="border-t border-gray-200 pt-4 flex items-center justify-between">
+              <dt class="text-base font-medium text-gray-900">Order total</dt>
+              <dd class="text-base font-medium text-gray-900"><%= @cart.formatted_total %></dd>
+            </div>
+          </dl>
+
+          <div class="mt-6">
+            <% if user_signed_in? %>
+              <%= link_to new_order_path, class: "w-full bg-rose-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 flex items-center justify-center" do %>
+                Proceed to Checkout
+                <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
+              <% end %>
+            <% else %>
+              <div class="space-y-3">
+                <%= link_to new_order_path, class: "w-full bg-rose-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 flex items-center justify-center" do %>
+                  Checkout as Guest
+                  <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                <% end %>
+                <div class="text-center text-sm text-gray-500">
+                  or
+                  <%= link_to "Sign in", new_user_session_path, class: "text-rose-600 hover:text-rose-500 font-medium" %>
+                  for faster checkout
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="mt-6 flex justify-center text-sm text-center text-gray-500">
+            <p>
+              or
+              <%= link_to products_path, class: "text-rose-600 font-medium hover:text-rose-500 ml-1" do %>
+                Continue Shopping
+                <span aria-hidden="true"> &rarr;</span>
+              <% end %>
+            </p>
+          </div>
+
+          <div class="mt-4 flex justify-center">
+            <%= link_to cart_path, method: :delete, 
+                data: { confirm: "Are you sure you want to clear your cart?" },
+                class: "text-sm text-gray-500 hover:text-gray-700 underline" do %>
+              Clear Cart
+            <% end %>
+          </div>
+        </section>
+      </div>
+    <% else %>
+      <!-- Empty Cart State -->
+      <div class="text-center py-16">
+        <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+          <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
+        <p class="text-gray-500 mb-8">Start adding some items to your cart to see them here.</p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <%= link_to products_path, class: "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500" do %>
+            <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+            Shop Products
+          <% end %>
+          
+          <%= link_to categories_path, class: "inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500" do %>
+            <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+            Browse Categories
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

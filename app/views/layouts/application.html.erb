@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= @page_title || content_for(:title) || "Brooke Maisy - Handmade Crafts & Creative Treasures" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="<%= @meta_description || content_for(:description) || 'Discover beautiful handmade bracelets, bookmarks, and stickers crafted with love by Brooke Maisy. Unique, creative treasures for every occasion.' %>">
+    
+    <!-- SEO Meta Tags -->
+    <% if @canonical_url %>
+      <link rel="canonical" href="<%= @canonical_url %>">
+    <% end %>
+    
+    <!-- Open Graph Meta Tags -->
+    <% if @og_title %>
+      <meta property="og:title" content="<%= @og_title %>">
+    <% end %>
+    <% if @og_description %>
+      <meta property="og:description" content="<%= @og_description %>">
+    <% end %>
+    <% if @og_type %>
+      <meta property="og:type" content="<%= @og_type %>">
+    <% end %>
+    <% if @og_image %>
+      <meta property="og:image" content="<%= @og_image %>">
+    <% end %>
+    
+    <!-- Structured Data -->
+    <% if @structured_data %>
+      <script type="application/ld+json">
+        <%= raw @structured_data.to_json %>
+      </script>
+    <% end %>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-ivory-50 min-h-screen">
+    <!-- Navigation -->
+    <%= render 'shared/navigation' %>
+    
+    <!-- Flash Messages -->
+    <%= render 'shared/flash_messages' %>
+    
+    <!-- Main Content -->
+    <main class="flex-1">
+      <%= yield %>
+    </main>
+    
+    <!-- Footer -->
+    <%= render 'shared/footer' %>
+  </body>
+</html>

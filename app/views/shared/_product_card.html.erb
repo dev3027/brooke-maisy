@@ -1,0 +1,118 @@
+<div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group">
+  <%= link_to product_path(product), class: "block" do %>
+    <!-- Product Image -->
+    <div class="aspect-square bg-ivory-100 relative overflow-hidden">
+      <% if product.main_image.present? %>
+        <%= image_tag product.main_image, 
+            alt: product.name,
+            class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+      <% else %>
+        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-ivory-100 to-ivory-200">
+          <div class="text-4xl text-ivory-400">🎨</div>
+        </div>
+      <% end %>
+      
+      <!-- Product Badges -->
+      <div class="absolute top-2 left-2 flex flex-col gap-1">
+        <% if product.featured? %>
+          <span class="bg-pastel-pink text-ivory-800 text-xs font-medium px-2 py-1 rounded-full">
+            Featured
+          </span>
+        <% end %>
+        <% if product.out_of_stock? %>
+          <span class="bg-ivory-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+            Out of Stock
+          </span>
+        <% elsif product.low_stock? %>
+          <span class="bg-pastel-peach text-ivory-800 text-xs font-medium px-2 py-1 rounded-full">
+            Low Stock
+          </span>
+        <% end %>
+      </div>
+      
+      <!-- Quick View Button (for future enhancement) -->
+      <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
+        <button class="bg-white text-ivory-800 px-4 py-2 rounded-lg font-medium opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-200">
+          Quick View
+        </button>
+      </div>
+    </div>
+    
+    <!-- Product Info -->
+    <div class="p-4">
+      <!-- Category -->
+      <p class="text-xs text-ivory-500 uppercase tracking-wide font-medium mb-1">
+        <%= product.category.name %>
+      </p>
+      
+      <!-- Product Name -->
+      <h3 class="font-semibold text-ivory-900 mb-2 line-clamp-2 group-hover:text-ivory-700 transition-colors">
+        <%= product.name %>
+      </h3>
+      
+      <!-- Price -->
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-lg font-bold text-ivory-900">
+          <%= product.display_price %>
+        </span>
+        <% if product.has_variants? %>
+          <span class="text-xs text-ivory-500">
+            <%= pluralize(product.available_variants.count, 'variant') %>
+          </span>
+        <% end %>
+      </div>
+      
+      <!-- Reviews -->
+      <% if product.reviews.approved.any? %>
+        <div class="flex items-center gap-1 mb-2">
+          <div class="flex items-center">
+            <% 5.times do |i| %>
+              <% if i < product.average_rating.floor %>
+                <svg class="w-3 h-3 text-pastel-peach fill-current" viewBox="0 0 20 20">
+                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                </svg>
+              <% elsif i < product.average_rating %>
+                <svg class="w-3 h-3 text-pastel-peach fill-current" viewBox="0 0 20 20">
+                  <defs>
+                    <linearGradient id="half-fill-<%= product.id %>">
+                      <stop offset="50%" stop-color="currentColor"/>
+                      <stop offset="50%" stop-color="transparent"/>
+                    </linearGradient>
+                  </defs>
+                  <path fill="url(#half-fill-<%= product.id %>)" d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                </svg>
+              <% else %>
+                <svg class="w-3 h-3 text-ivory-300 fill-current" viewBox="0 0 20 20">
+                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                </svg>
+              <% end %>
+            <% end %>
+          </div>
+          <span class="text-xs text-ivory-500 ml-1">
+            (<%= product.reviews_count %>)
+          </span>
+        </div>
+      <% end %>
+      
+      <!-- Stock Status -->
+      <div class="flex items-center justify-between">
+        <% if product.in_stock? %>
+          <span class="text-xs text-pastel-sage font-medium">
+            ✓ In Stock
+          </span>
+        <% else %>
+          <span class="text-xs text-ivory-500 font-medium">
+            Out of Stock
+          </span>
+        <% end %>
+        
+        <!-- Add to Cart Button (for future cart functionality) -->
+        <% if product.in_stock? %>
+          <button class="text-xs bg-ivory-500 hover:bg-ivory-600 text-white px-3 py-1 rounded-md font-medium transition-colors opacity-0 group-hover:opacity-100">
+            Add to Cart
+          </button>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

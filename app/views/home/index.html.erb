@@ -1,0 +1,138 @@
+<div class="min-h-screen">
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-ivory-100 to-pastel-peach py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl md:text-6xl font-bold text-ivory-900 mb-6">
+        Handcrafted with
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-pastel-pink to-pastel-lavender">
+          Love
+        </span>
+      </h1>
+      <p class="text-xl text-ivory-700 mb-8 max-w-2xl mx-auto">
+        Discover unique bracelets, bookmarks, and stickers that bring joy to everyday moments. 
+        Each piece tells a story, crafted with care just for you.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <%= link_to products_path, class: "bg-ivory-500 hover:bg-ivory-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors" do %>
+          Shop Now
+        <% end %>
+        <%= link_to "#", class: "border-2 border-ivory-500 text-ivory-700 hover:bg-ivory-500 hover:text-white px-8 py-3 rounded-lg font-semibold transition-colors" do %>
+          Read Our Story
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Categories -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-ivory-900 text-center mb-12">Shop by Category</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <% Category.active.ordered.limit(3).each do |category| %>
+          <%= link_to category_path(category), class: "group cursor-pointer" do %>
+            <div class="aspect-square bg-gradient-to-br from-pastel-<%= ['pink', 'mint', 'sky'].sample %> to-pastel-<%= ['lavender', 'sage', 'peach'].sample %> rounded-2xl mb-4 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div class="text-6xl">
+                <% case category.name.downcase %>
+                <% when /bracelet/ %>
+                  💫
+                <% when /bookmark/ %>
+                  📖
+                <% when /sticker/ %>
+                  ✨
+                <% when /jewelry/ %>
+                  💎
+                <% when /art/ %>
+                  🎨
+                <% else %>
+                  🌟
+                <% end %>
+              </div>
+            </div>
+            <h3 class="text-xl font-semibold text-ivory-900 mb-2"><%= category.name %></h3>
+            <p class="text-ivory-600">
+              <%= category.description.present? ? truncate(category.description, length: 80) : "Handcrafted #{category.name.downcase} made with love" %>
+            </p>
+          <% end %>
+        <% end %>
+        
+        <!-- Fallback if no categories -->
+        <% if Category.active.count == 0 %>
+          <!-- Bracelets -->
+          <%= link_to products_path, class: "group cursor-pointer" do %>
+            <div class="aspect-square bg-gradient-to-br from-pastel-pink to-pastel-lavender rounded-2xl mb-4 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div class="text-6xl">💫</div>
+            </div>
+            <h3 class="text-xl font-semibold text-ivory-900 mb-2">Bracelets</h3>
+            <p class="text-ivory-600">Friendship bracelets, beaded designs, and charm collections</p>
+          <% end %>
+
+          <!-- Bookmarks -->
+          <%= link_to products_path, class: "group cursor-pointer" do %>
+            <div class="aspect-square bg-gradient-to-br from-pastel-mint to-pastel-sage rounded-2xl mb-4 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div class="text-6xl">📖</div>
+            </div>
+            <h3 class="text-xl font-semibold text-ivory-900 mb-2">Bookmarks</h3>
+            <p class="text-ivory-600">Laminated bookmarks with inspiring quotes and beautiful designs</p>
+          <% end %>
+
+          <!-- Stickers -->
+          <%= link_to products_path, class: "group cursor-pointer" do %>
+            <div class="aspect-square bg-gradient-to-br from-pastel-sky to-pastel-peach rounded-2xl mb-4 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div class="text-6xl">✨</div>
+            </div>
+            <h3 class="text-xl font-semibold text-ivory-900 mb-2">Stickers</h3>
+            <p class="text-ivory-600">Vinyl stickers with cute illustrations and creative designs</p>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Preview -->
+  <section class="py-16 bg-ivory-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl font-bold text-ivory-900 mb-6">The Story Behind Every Piece</h2>
+          <p class="text-ivory-700 mb-6">
+            Hi, I'm Brooke! What started as a creative hobby has blossomed into a passion for bringing 
+            handmade joy to others. Every bracelet, bookmark, and sticker is crafted with love in my 
+            little studio, where creativity meets care.
+          </p>
+          <p class="text-ivory-700 mb-8">
+            I believe that handmade items carry a special energy – they're not just products, 
+            they're little pieces of happiness meant to brighten your day.
+          </p>
+          <%= link_to "#", class: "text-ivory-600 hover:text-ivory-800 font-semibold flex items-center" do %>
+            Read More About My Journey
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          <% end %>
+        </div>
+        <div class="bg-gradient-to-br from-pastel-lavender to-pastel-mint rounded-2xl aspect-square flex items-center justify-center">
+          <div class="text-8xl">🎨</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="py-16 bg-gradient-to-r from-pastel-pink to-pastel-lavender">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-ivory-900 mb-4">Stay Connected</h2>
+      <p class="text-ivory-700 mb-8">
+        Be the first to see new creations, get behind-the-scenes peeks, and receive special offers.
+      </p>
+      <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+        <input type="email" 
+               placeholder="Enter your email" 
+               class="flex-1 px-4 py-3 rounded-lg border border-ivory-300 focus:outline-none focus:ring-2 focus:ring-ivory-500 focus:border-transparent">
+        <button type="submit" 
+                class="bg-ivory-600 hover:bg-ivory-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+          Subscribe
+        </button>
+      </form>
+    </div>
+  </section>
+</div>

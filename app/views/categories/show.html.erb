@@ -1,0 +1,282 @@
+<% content_for :title, @page_title %>
+<% content_for :description, @meta_description %>
+<% content_for :head do %>
+  <link rel="canonical" href="<%= @canonical_url %>">
+  <meta property="og:title" content="<%= @og_title %>">
+  <meta property="og:description" content="<%= @og_description %>">
+  <meta property="og:type" content="<%= @og_type %>">
+  <meta property="og:url" content="<%= @canonical_url %>">
+  <script type="application/ld+json">
+    <%= raw @structured_data.to_json %>
+  </script>
+<% end %>
+
+<!-- Breadcrumbs -->
+<%= render 'shared/breadcrumbs', breadcrumbs: [
+  { text: 'Shop', url: products_path },
+  { text: 'Categories', url: categories_path },
+  { text: @category.name, url: nil }
+] %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Category Header -->
+  <div class="text-center mb-12">
+    <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-pastel-<%= ['pink', 'mint', 'sky', 'peach', 'lavender', 'sage'].sample %> to-pastel-<%= ['pink', 'mint', 'sky', 'peach', 'lavender', 'sage'].sample %> rounded-full mb-6">
+      <div class="text-3xl">
+        <% case @category.name.downcase %>
+        <% when /bracelet/ %>
+          💫
+        <% when /bookmark/ %>
+          📖
+        <% when /sticker/ %>
+          ✨
+        <% when /jewelry/ %>
+          💎
+        <% when /art/ %>
+          🎨
+        <% else %>
+          🌟
+        <% end %>
+      </div>
+    </div>
+    
+    <h1 class="text-4xl font-bold text-ivory-900 mb-4"><%= @category.name %></h1>
+    <% if @category.description.present? %>
+      <p class="text-xl text-ivory-600 max-w-2xl mx-auto mb-6">
+        <%= @category.description %>
+      </p>
+    <% end %>
+    
+    <div class="flex items-center justify-center gap-6 text-sm text-ivory-500">
+      <span><%= pluralize(@total_count, 'product') %></span>
+      <span>•</span>
+      <span>Handmade with love</span>
+      <span>•</span>
+      <span>Free shipping on orders over $50</span>
+    </div>
+  </div>
+
+  <div class="lg:grid lg:grid-cols-4 lg:gap-8">
+    <!-- Sidebar Filters -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-lg shadow-sm p-6 mb-6 lg:mb-0 sticky top-20">
+        <h3 class="text-lg font-semibold text-ivory-900 mb-4">Filters</h3>
+        
+        <%= form_with url: category_path(@category), method: :get, local: true, class: "space-y-6" do |form| %>
+          <!-- Price Range -->
+          <div>
+            <h4 class="text-sm font-medium text-ivory-900 mb-3">Price Range</h4>
+            <div class="space-y-2">
+              <% [
+                ['All Prices', ''],
+                ['Under $10', 'under_10'],
+                ['$10 - $25', '10_25'],
+                ['$25 - $50', '25_50'],
+                ['Over $50', 'over_50']
+              ].each do |label, value| %>
+                <label class="flex items-center">
+                  <%= form.radio_button :price_range, value, 
+                      checked: @price_range == value,
+                      class: "text-ivory-600 focus:ring-ivory-500 border-ivory-300" %>
+                  <span class="ml-2 text-sm text-ivory-700"><%= label %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Availability -->
+          <div>
+            <h4 class="text-sm font-medium text-ivory-900 mb-3">Availability</h4>
+            <div class="space-y-2">
+              <% [
+                ['All Products', ''],
+                ['In Stock', 'in_stock'],
+                ['Out of Stock', 'out_of_stock']
+              ].each do |label, value| %>
+                <label class="flex items-center">
+                  <%= form.radio_button :availability, value, 
+                      checked: @availability == value,
+                      class: "text-ivory-600 focus:ring-ivory-500 border-ivory-300" %>
+                  <span class="ml-2 text-sm text-ivory-700"><%= label %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Apply Filters Button -->
+          <div class="pt-4 border-t border-ivory-200">
+            <%= form.submit "Apply Filters", 
+                class: "w-full bg-ivory-500 hover:bg-ivory-600 text-white py-2 px-4 rounded-md font-medium transition-colors" %>
+          </div>
+        <% end %>
+
+        <!-- Related Categories -->
+        <% if @related_categories.any? %>
+          <div class="mt-8 pt-6 border-t border-ivory-200">
+            <h4 class="text-sm font-medium text-ivory-900 mb-3">Other Categories</h4>
+            <div class="space-y-2">
+              <% @related_categories.each do |category| %>
+                <%= link_to category_path(category), 
+                    class: "block text-sm text-ivory-600 hover:text-ivory-800 transition-colors" do %>
+                  <%= category.name %>
+                  <span class="text-xs text-ivory-400 ml-1">(<%= category.products.active.count %>)</span>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="lg:col-span-3">
+      <!-- Sort and View Options -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div class="flex items-center text-sm text-ivory-600">
+          Showing <%= (@page - 1) * @per_page + 1 %>-<%= [@page * @per_page, @total_count].min %> of <%= @total_count %> products
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <!-- Sort Options -->
+          <%= form_with url: category_path(@category), method: :get, local: true, class: "flex items-center gap-2" do |form| %>
+            <!-- Preserve all current params -->
+            <% params.except(:sort, :page).each do |key, value| %>
+              <%= form.hidden_field key, value: value %>
+            <% end %>
+            
+            <label for="sort" class="text-sm text-ivory-700 font-medium">Sort by:</label>
+            <%= form.select :sort, [
+              ['Newest', 'newest'],
+              ['Oldest', 'oldest'],
+              ['Name A-Z', 'name_asc'],
+              ['Name Z-A', 'name_desc'],
+              ['Price Low-High', 'price_asc'],
+              ['Price High-Low', 'price_desc'],
+              ['Featured', 'featured']
+            ], { selected: @sort_option }, {
+              class: "text-sm border-ivory-300 rounded-md focus:ring-ivory-500 focus:border-ivory-500",
+              onchange: "this.form.submit();"
+            } %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <% if @products.any? %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <% @products.each do |product| %>
+            <%= render 'shared/product_card', product: product %>
+          <% end %>
+        </div>
+
+        <!-- Pagination -->
+        <% if @total_pages > 1 %>
+          <nav class="flex items-center justify-between border-t border-ivory-200 pt-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+              <!-- Mobile pagination -->
+              <% if @page > 1 %>
+                <%= link_to "Previous", 
+                    category_path(@category) + "?" + request.query_parameters.merge(page: @page - 1).to_query,
+                    class: "relative inline-flex items-center px-4 py-2 border border-ivory-300 text-sm font-medium rounded-md text-ivory-700 bg-white hover:bg-ivory-50" %>
+              <% end %>
+              <% if @page < @total_pages %>
+                <%= link_to "Next", 
+                    category_path(@category) + "?" + request.query_parameters.merge(page: @page + 1).to_query,
+                    class: "ml-3 relative inline-flex items-center px-4 py-2 border border-ivory-300 text-sm font-medium rounded-md text-ivory-700 bg-white hover:bg-ivory-50" %>
+              <% end %>
+            </div>
+            
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm text-ivory-700">
+                  Showing page <span class="font-medium"><%= @page %></span> of <span class="font-medium"><%= @total_pages %></span>
+                </p>
+              </div>
+              <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                  <!-- Previous -->
+                  <% if @page > 1 %>
+                    <%= link_to category_path(@category) + "?" + request.query_parameters.merge(page: @page - 1).to_query,
+                        class: "relative inline-flex items-center px-2 py-2 rounded-l-md border border-ivory-300 bg-white text-sm font-medium text-ivory-500 hover:bg-ivory-50" do %>
+                      <span class="sr-only">Previous</span>
+                      <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                      </svg>
+                    <% end %>
+                  <% end %>
+                  
+                  <!-- Page Numbers -->
+                  <% page_range = [[@page - 2, 1].max, [@page + 2, @total_pages].min] %>
+                  <% (page_range[0]..page_range[1]).each do |page_num| %>
+                    <% if page_num == @page %>
+                      <span class="relative inline-flex items-center px-4 py-2 border border-ivory-500 bg-ivory-50 text-sm font-medium text-ivory-600">
+                        <%= page_num %>
+                      </span>
+                    <% else %>
+                      <%= link_to page_num,
+                          category_path(@category) + "?" + request.query_parameters.merge(page: page_num).to_query,
+                          class: "relative inline-flex items-center px-4 py-2 border border-ivory-300 bg-white text-sm font-medium text-ivory-700 hover:bg-ivory-50" %>
+                    <% end %>
+                  <% end %>
+                  
+                  <!-- Next -->
+                  <% if @page < @total_pages %>
+                    <%= link_to category_path(@category) + "?" + request.query_parameters.merge(page: @page + 1).to_query,
+                        class: "relative inline-flex items-center px-2 py-2 rounded-r-md border border-ivory-300 bg-white text-sm font-medium text-ivory-500 hover:bg-ivory-50" do %>
+                      <span class="sr-only">Next</span>
+                      <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                      </svg>
+                    <% end %>
+                  <% end %>
+                </nav>
+              </div>
+            </div>
+          </nav>
+        <% end %>
+      <% else %>
+        <!-- No Products Found -->
+        <div class="text-center py-12">
+          <div class="text-6xl mb-4">🔍</div>
+          <h3 class="text-xl font-semibold text-ivory-900 mb-2">No products found</h3>
+          <p class="text-ivory-600 mb-6">
+            No products match your current filters in this category.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <%= link_to "Clear Filters", category_path(@category), 
+                class: "bg-ivory-500 hover:bg-ivory-600 text-white px-6 py-2 rounded-md font-medium transition-colors" %>
+            <%= link_to "Browse All Products", products_path, 
+                class: "border border-ivory-500 text-ivory-700 hover:bg-ivory-500 hover:text-white px-6 py-2 rounded-md font-medium transition-colors" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Category Description (if longer) -->
+  <% if @category.description.present? && @category.description.length > 200 %>
+    <div class="mt-16 bg-ivory-50 rounded-2xl p-8">
+      <h2 class="text-2xl font-bold text-ivory-900 mb-4">About <%= @category.name %></h2>
+      <div class="prose prose-lg text-ivory-700 max-w-none">
+        <%= simple_format(@category.description) %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Call to Action -->
+  <div class="mt-16 bg-gradient-to-r from-pastel-pink to-pastel-lavender rounded-2xl p-8 text-center">
+    <h2 class="text-2xl font-bold text-ivory-900 mb-4">Love What You See?</h2>
+    <p class="text-ivory-700 mb-6 max-w-2xl mx-auto">
+      Each piece in our <%= @category.name.downcase %> collection is handcrafted with care. 
+      Have questions or need something custom? We'd love to help!
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <%= link_to "#", class: "bg-ivory-600 hover:bg-ivory-700 text-white px-6 py-3 rounded-lg font-medium transition-colors" do %>
+        Contact Us
+      <% end %>
+      <%= link_to categories_path, class: "border border-ivory-600 text-ivory-700 hover:bg-ivory-600 hover:text-white px-6 py-3 rounded-lg font-medium transition-colors" do %>
+        Browse Other Categories
+      <% end %>
+    </div>
+  </div>
+</div>

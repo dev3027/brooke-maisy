@@ -1,0 +1,156 @@
+<% content_for :title, @page_title %>
+<% content_for :description, @meta_description %>
+
+<!-- Breadcrumbs -->
+<%= render 'shared/breadcrumbs', breadcrumbs: [
+  { text: 'Categories', url: nil }
+] %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Page Header -->
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-ivory-900 mb-4">Shop by Category</h1>
+    <p class="text-xl text-ivory-600 max-w-2xl mx-auto">
+      Explore our handcrafted collections, each piece made with love and attention to detail.
+    </p>
+  </div>
+
+  <!-- Categories Grid -->
+  <% if @categories.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+      <% @categories.each do |category| %>
+        <div class="group">
+          <%= link_to category_path(category), class: "block" do %>
+            <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group-hover:scale-105">
+              <!-- Category Image/Icon -->
+              <div class="aspect-square bg-gradient-to-br from-pastel-<%= ['pink', 'mint', 'sky', 'peach', 'lavender', 'sage'].sample %> to-pastel-<%= ['pink', 'mint', 'sky', 'peach', 'lavender', 'sage'].sample %> flex items-center justify-center relative">
+                <!-- Category icon based on name -->
+                <div class="text-6xl">
+                  <% case category.name.downcase %>
+                  <% when /bracelet/ %>
+                    💫
+                  <% when /bookmark/ %>
+                    📖
+                  <% when /sticker/ %>
+                    ✨
+                  <% when /jewelry/ %>
+                    💎
+                  <% when /art/ %>
+                    🎨
+                  <% else %>
+                    🌟
+                  <% end %>
+                </div>
+                
+                <!-- Product count badge -->
+                <div class="absolute top-4 right-4 bg-white bg-opacity-90 text-ivory-800 text-xs font-medium px-2 py-1 rounded-full">
+                  <%= pluralize(category.products.active.count, 'item') %>
+                </div>
+              </div>
+              
+              <!-- Category Info -->
+              <div class="p-6">
+                <h3 class="text-xl font-semibold text-ivory-900 mb-2 group-hover:text-ivory-700 transition-colors">
+                  <%= category.name %>
+                </h3>
+                <% if category.description.present? %>
+                  <p class="text-ivory-600 text-sm mb-4 line-clamp-2">
+                    <%= category.description %>
+                  </p>
+                <% end %>
+                
+                <!-- Sample products preview -->
+                <% sample_products = category.products.active.includes(images_attachments: :blob).limit(3) %>
+                <% if sample_products.any? %>
+                  <div class="flex -space-x-2 mb-4">
+                    <% sample_products.each do |product| %>
+                      <% if product.main_image.present? %>
+                        <div class="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-ivory-100">
+                          <img src="<%= url_for(product.main_image) %>" 
+                               alt="<%= product.name %>"
+                               class="w-full h-full object-cover">
+                        </div>
+                      <% end %>
+                    <% end %>
+                    <% if category.products.active.count > 3 %>
+                      <div class="w-8 h-8 rounded-full border-2 border-white bg-ivory-200 flex items-center justify-center">
+                        <span class="text-xs text-ivory-600 font-medium">+<%= category.products.active.count - 3 %></span>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+                
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-ivory-500">
+                    <%= pluralize(category.products.active.count, 'product') %>
+                  </span>
+                  <span class="text-ivory-600 group-hover:text-ivory-800 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <!-- No Categories -->
+    <div class="text-center py-12">
+      <div class="text-6xl mb-4">📂</div>
+      <h3 class="text-xl font-semibold text-ivory-900 mb-2">No categories available</h3>
+      <p class="text-ivory-600 mb-6">
+        We're working on organizing our products. Check back soon!
+      </p>
+      <%= link_to "Browse All Products", products_path, 
+          class: "bg-ivory-500 hover:bg-ivory-600 text-white px-6 py-3 rounded-lg font-medium transition-colors" %>
+    </div>
+  <% end %>
+
+  <!-- Featured Products Section -->
+  <% if @featured_products.any? %>
+    <div class="border-t border-ivory-200 pt-16">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-ivory-900 mb-4">Featured Products</h2>
+        <p class="text-lg text-ivory-600">
+          Handpicked favorites from across our collections
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <% @featured_products.each do |product| %>
+          <%= render 'shared/product_card', product: product %>
+        <% end %>
+      </div>
+      
+      <div class="text-center">
+        <%= link_to products_path,
+            class: "inline-flex items-center text-ivory-600 hover:text-ivory-800 font-semibold" do %>
+          View All Products
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Call to Action -->
+  <div class="mt-16 bg-gradient-to-r from-pastel-pink to-pastel-lavender rounded-2xl p-8 text-center">
+    <h2 class="text-2xl font-bold text-ivory-900 mb-4">Can't Find What You're Looking For?</h2>
+    <p class="text-ivory-700 mb-6 max-w-2xl mx-auto">
+      Every piece is handmade with love. If you have a special request or custom order in mind, 
+      we'd love to hear from you!
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <%= link_to "#", class: "bg-ivory-600 hover:bg-ivory-700 text-white px-6 py-3 rounded-lg font-medium transition-colors" do %>
+        Contact Us
+      <% end %>
+      <%= link_to products_path, class: "border border-ivory-600 text-ivory-700 hover:bg-ivory-600 hover:text-white px-6 py-3 rounded-lg font-medium transition-colors" do %>
+        Browse All Products
+      <% end %>
+    </div>
+  </div>
+</div>

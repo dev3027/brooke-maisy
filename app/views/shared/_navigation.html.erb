@@ -1,13 +1,13 @@
-<nav class="bg-ivory-50 shadow-sm sticky top-0 z-50 border-b border-ivory-200">
+<nav class="bg-ivory-50 shadow-sm sticky top-0 z-50 border-b border-ivory-200 font-family-playfair">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
       <!-- Logo -->
       <div class="flex-shrink-0">
         <%= link_to root_path, class: "flex items-center space-x-2" do %>
-          <div class="w-8 h-8 bg-gradient-to-br from-pastel-pink to-pastel-lavender rounded-full flex items-center justify-center">
-            <span class="text-ivory-800 font-bold text-sm">BM</span>
+          <div class="w-10 h-10 bg-gradient-to-br from-pastel-pink to-pastel-lavender rounded-full flex items-center justify-center">
+            <span class="text-ivory-800 font-bold text-sm p-2">B&M</span>
           </div>
-          <span class="text-2xl font-bold text-ivory-800 hidden sm:block">Brooke Maisy</span>
+          <span class="text-2xl  text-ivory-800 hidden sm:block">BROOKE & MAISY</span>
         <% end %>
       </div>
       
@@ -65,8 +65,8 @@
       <!-- User Actions -->
       <div class="flex items-center space-x-6">
         <!-- Cart -->
-        
-          <%= link_to cart_path, class: "relative p-2 text-ivory-700 hover:text-ivory-900 transition-colors" do %>
+        <!-- Turbo frame here Cart-content -->
+          <%= link_to cart_path, class: "relative p-2 mt-2 text-ivory-700 hover:text-ivory-900 transition-colors" do %>
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9"></path>
@@ -82,7 +82,7 @@
               </span>
             <% end %>
           <% end %>
-        
+        <!-- End Cart -->
         
         <!-- User Menu -->
         <% if user_signed_in? %>
